@@ -14,7 +14,7 @@ type CandidateService interface {
 }
 
 type candidateService struct {
-	Client *Client
+	client *Client
 }
 
 func (s *candidateService) Get(ids []int64) (candidates []Candidate, err error) {

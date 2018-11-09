@@ -23,6 +23,7 @@ type Client struct {
 	BaseURL string
 
 	// Services used for talking with different parts of the Greenhouse API
+	Candidates CandidateService
 }
 
 // NewClient returns a new instance of *Client.
@@ -38,7 +39,7 @@ func NewClient(accessToken string, httpClient *http.Client) *Client {
 	}
 
 	//Services
-
+	client.Candidates = &candidateService{client: client}
 	return client
 }
 
