@@ -1,7 +1,12 @@
 package ingestion
 
 import (
+	"bytes"
+	"encoding/xml"
+	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 const defaultBaseURL = "https://api.greenhouse.io/"
@@ -35,4 +40,41 @@ func NewClient(accessToken string, httpClient *http.Client) *Client {
 	//Services
 
 	return client
+}
+
+// Params are used to send parameters with the request.
+type Params map[string]interface{}
+
+// newRequest creates an authenticated API request that is ready to send.
+func (c *Client) newRequest(method string, endpoint string, params Params, body interface{}) (*http.Request, error) {
+	method = strings.ToUpper(method)
+	requestURL := fmt.Sprintf("%sv1/%s", c.BaseURL, endpoint)
+
+	// Query String
+	qs := url.Values{}
+	for k, v := range params {
+		qs.Add(k, fmt.Sprintf("%v", v))
+	}
+
+	if len(qs) > 0 {
+		requestURL += "?" + qs.Encode()
+	}
+
+	// Request body
+	var buf bytes.Buffer
+	if body != nil {
+		err := xml.NewEncoder(&buf).Encode(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, requestURL, &buf)
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.accessToken))
+	if req.Method == "POST" || req.Method == "PUT" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
+
+	return req, err
 }
