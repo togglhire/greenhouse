@@ -1,5 +1,6 @@
 package ingestion
 
+// Candidate is the struct used for retreiving candidates from Greenhouse
 type Candidate struct {
 	ID           int64         `json:"id"`
 	Name         string        `json:"name"`
@@ -7,6 +8,7 @@ type Candidate struct {
 	Applications []Application `json:"applications"`
 }
 
+// PostCandidate is the struct used for creating a new candidate in Greenhouse
 type PostCandidate struct {
 	Prospect            string        `json:"prospect,omitempty"`
 	FirstName           string        `json:"first_name,omitempty"`
@@ -27,10 +29,19 @@ type PostCandidate struct {
 	Addresses           []Address     `json:"addresses,omitempty"`
 }
 
+// PostCandidateResponse is the struct that is returned when a new candidate is created in Greenhouse
+type PostCandidateResponse struct {
+	ID            int64  `json:"id,omitempty"`
+	ApplicationID int64  `json:"application_id,omitempty"`
+	ExternalID    string `json:"external_id,omitempty"`
+	ProfileURL    string `json:"profile_url,omitempty"`
+}
+
 type PhoneNumber struct {
 	PhoneNumber string          `json:"phone_number,omitempty"`
 	Type        PhoneNumberType `json:"type,omitempty"`
 }
+
 type PhoneNumberType string
 
 const (
