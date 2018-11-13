@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -52,9 +54,7 @@ func Test_int64ArrayToCSV(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := int64ArrayToCSV(tt.args.a); got != tt.want {
-				t.Errorf("int64ArrayToCSV() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, int64ArrayToCSV(tt.args.a))
 		})
 	}
 }
