@@ -2,8 +2,9 @@ package ingestion
 
 import (
 	"bytes"
-	"encoding/xml"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,6 +44,13 @@ func NewClient(accessToken string, httpClient *http.Client) *Client {
 	return client
 }
 
+// ReadJSON reads the json value into the v param. Can only read once!
+func readJSON(r io.ReadCloser, v interface{}) error {
+	decoder := json.NewDecoder(r)
+	err := decoder.Decode(&v)
+	return err
+}
+
 // Params are used to send parameters with the request.
 type Params map[string]interface{}
 
@@ -64,7 +72,7 @@ func (c *Client) newRequest(method string, endpoint string, params Params, body 
 	// Request body
 	var buf bytes.Buffer
 	if body != nil {
-		err := xml.NewEncoder(&buf).Encode(body)
+		err := json.NewEncoder(&buf).Encode(body)
 		if err != nil {
 			return nil, err
 		}
@@ -78,4 +86,32 @@ func (c *Client) newRequest(method string, endpoint string, params Params, body 
 	}
 
 	return req, err
+}
+
+// do takes a prepared API request and makes the API call to Greenhouse.
+// It will decode the JSON into a destination struct you provide as well
+// as parse any validation errors that may have occurred.
+// It returns a Response object that provides a wrapper around http.Response
+// with some convenience methods.
+func (c *Client) do(req *http.Request, v interface{}) error {
+	req.Close = true
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp == nil {
+		return ErrShouldNotBeNil
+	}
+	defer resp.Body.Close()
+	if r, err := isError(resp); r && err == nil {
+		if r, err := isClientError(resp); r && err == nil {
+			v = ClientError{}
+		}
+		if r, err := isServerError(resp); r && err == nil {
+			v = ServerError{}
+		}
+	}
+
+	err = readJSON(resp.Body, &v)
+	return err
 }
