@@ -3,6 +3,7 @@ package ingestion
 import (
 	"net/http"
 	"net/http/httptest"
+	"testing"
 )
 
 var (
@@ -30,4 +31,30 @@ func setup() {
 
 func teardown() {
 	server.Close()
+}
+
+func Test_int64ArrayToCSV(t *testing.T) {
+	type args struct {
+		a []int64
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "A",
+			args: args{
+				a: []int64{2, 3, 4, 5},
+			},
+			want: "2,3,4,5",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := int64ArrayToCSV(tt.args.a); got != tt.want {
+				t.Errorf("int64ArrayToCSV() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

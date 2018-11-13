@@ -110,8 +110,14 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		if r, err := isServerError(resp); r && err == nil {
 			v = ServerError{}
 		}
+	} else {
+		return err
 	}
 
 	err = readJSON(resp.Body, &v)
 	return err
+}
+
+func int64ArrayToCSV(a []int64) string {
+	return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), ","), "[]")
 }
