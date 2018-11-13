@@ -103,6 +103,7 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		return ErrShouldNotBeNil
 	}
 	defer resp.Body.Close()
+
 	if r, err := isError(resp); r && err == nil {
 		if r, err := isClientError(resp); r && err == nil {
 			v = ClientError{}
@@ -110,7 +111,7 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		if r, err := isServerError(resp); r && err == nil {
 			v = ServerError{}
 		}
-	} else {
+	} else if err != nil {
 		return err
 	}
 
