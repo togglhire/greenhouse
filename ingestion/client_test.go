@@ -119,9 +119,19 @@ func Test_do_client_error(t *testing.T) {
 	test := struct {
 		wantErr       bool
 		wantErrorType error
+		clientError   ClientError
 	}{
 		wantErr:       true,
 		wantErrorType: ClientError{},
+		clientError: ClientError{
+			StatusCode: 400,
+			Errors: []Error{
+				Error{
+					Message: "Your request included invalid JSON.",
+					Field:   "email",
+				},
+			},
+		},
 	}
 
 	var result interface{}
@@ -139,14 +149,7 @@ func Test_do_client_error(t *testing.T) {
 	}
 
 	clientError, _ := IsClientError(err)
-	assert.Equal(t, ClientError{
-		Errors: []Error{
-			Error{
-				Message: "Your request included invalid JSON.",
-				Field:   "email",
-			},
-		},
-	}, clientError)
+	assert.Equal(t, test.clientError, clientError)
 }
 
 func Test_do_server_error(t *testing.T) {
@@ -172,9 +175,19 @@ func Test_do_server_error(t *testing.T) {
 	test := struct {
 		wantErr       bool
 		wantErrorType error
+		serverError   ServerError
 	}{
 		wantErr:       true,
 		wantErrorType: ServerError{},
+		serverError: ServerError{
+			StatusCode: 500,
+			Errors: []Error{
+				Error{
+					Message: "Your request included invalid JSON.",
+					Field:   "email",
+				},
+			},
+		},
 	}
 
 	var result interface{}
@@ -192,12 +205,5 @@ func Test_do_server_error(t *testing.T) {
 	}
 
 	serverError, _ := IsServerError(err)
-	assert.Equal(t, ServerError{
-		Errors: []Error{
-			Error{
-				Message: "Your request included invalid JSON.",
-				Field:   "email",
-			},
-		},
-	}, serverError)
+	assert.Equal(t, test.serverError, serverError)
 }

@@ -2,10 +2,10 @@ package ingestion
 
 // Candidate is the struct used for retreiving candidates from Greenhouse
 type Candidate struct {
-	ID           int64         `json:"id"`
-	Name         string        `json:"name"`
-	ExternalID   string        `json:"external_id"`
-	Applications []Application `json:"applications"`
+	ID           int64         `json:"id,omitempty"`
+	Name         string        `json:"name,omitempty"`
+	ExternalID   string        `json:"external_id,omitempty"`
+	Applications []Application `json:"applications,omitempty"`
 }
 
 // PostCandidate is the struct used for creating a new candidate in Greenhouse
