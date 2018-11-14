@@ -26,6 +26,7 @@ type Client struct {
 	// Services used for talking with different parts of the Greenhouse API
 	Candidates  CandidateService
 	CurrentUser CurrentUserService
+	Jobs        JobService
 }
 
 // NewClient returns a new instance of *Client.
@@ -43,6 +44,7 @@ func NewClient(accessToken string, httpClient *http.Client) *Client {
 	//Services
 	client.Candidates = &candidateService{client: client}
 	client.CurrentUser = &currentUserService{client: client}
+	client.Jobs = &jobService{client: client}
 	return client
 }
 
@@ -111,14 +113,20 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 			clientError := ClientError{
 				StatusCode: resp.StatusCode,
 			}
-			readJSON(resp.Body, &clientError)
+			err = readJSON(resp.Body, &clientError)
+			if err != nil {
+				return err
+			}
 			return clientError
 		}
 		if r, err = isServerError(resp); r && err == nil {
 			serverError := ServerError{
 				StatusCode: resp.StatusCode,
 			}
-			readJSON(resp.Body, &serverError)
+			err = readJSON(resp.Body, &serverError)
+			if err != nil {
+				return err
+			}
 			return serverError
 		}
 	} else if err != nil {
