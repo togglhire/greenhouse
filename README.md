@@ -4,7 +4,7 @@
 ## Greenhouse Ingestion API
 https://developers.greenhouse.io/candidate-ingestion.html
 
-## Installation
+### Installation
 Install using the "go get" command:
 ```sh
 go get github.com/hundred5/greenhouse/ingestion
