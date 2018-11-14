@@ -37,11 +37,13 @@ type PostCandidateResponse struct {
 	ProfileURL    string `json:"profile_url,omitempty"`
 }
 
+// PhoneNumber struct is for representing a phone number in greenhouse
 type PhoneNumber struct {
 	PhoneNumber string          `json:"phone_number,omitempty"`
 	Type        PhoneNumberType `json:"type,omitempty"`
 }
 
+// PhoneNumberType is for representing the possible types of phone numbers
 type PhoneNumberType string
 
 const (
@@ -51,6 +53,7 @@ const (
 	PhoneNumberTypeOther  = PhoneNumberType("other")
 )
 
+// Email struct is for representing an email address in greenhouse
 type Email struct {
 	Email string    `json:"email,omitempty"`
 	Type  EmailType `json:"type,omitempty"`

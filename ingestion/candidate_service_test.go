@@ -75,7 +75,6 @@ func Test_candidateService_Retrieve(t *testing.T) {
 		assert.NoError(t, err)
 	}
 	assert.Equal(t, test.wantCandidates, gotCandidates)
-
 }
 
 func Test_candidateService_Post(t *testing.T) {
