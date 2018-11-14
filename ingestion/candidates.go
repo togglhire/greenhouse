@@ -11,7 +11,7 @@ type candidateService struct {
 	client *Client
 }
 
-func (s *candidateService) Retrieve(ids []int64) (candidates []Candidate, err error) {
+func (s *candidateService) Retrieve(ids []int64) (result []Candidate, err error) {
 	params := Params{
 		"candidate_ids": int64ArrayToCSV,
 	}
@@ -19,10 +19,15 @@ func (s *candidateService) Retrieve(ids []int64) (candidates []Candidate, err er
 	if err != nil {
 		return
 	}
-	err = s.client.do(req, &candidates)
+	err = s.client.do(req, &result)
 	return
 }
 
-func (s *candidateService) Post(candidates []PostCandidate) ([]PostCandidateResponse, error) {
-	return []PostCandidateResponse{}, ErrNotImplemented
+func (s *candidateService) Post(candidates []PostCandidate) (result []PostCandidateResponse, err error) {
+	req, err := s.client.newRequest("POST", "partner/candidates", nil, candidates)
+	if err != nil {
+		return
+	}
+	err = s.client.do(req, &result)
+	return
 }

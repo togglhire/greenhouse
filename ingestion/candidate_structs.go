@@ -10,7 +10,7 @@ type Candidate struct {
 
 // PostCandidate is the struct used for creating a new candidate in Greenhouse
 type PostCandidate struct {
-	Prospect            string        `json:"prospect,omitempty"`
+	Prospect            bool          `json:"prospect,omitempty"`
 	FirstName           string        `json:"first_name,omitempty"`
 	LastName            string        `json:"last_name,omitempty"`
 	Company             string        `json:"company,omitempty"`

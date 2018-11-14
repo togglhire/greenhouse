@@ -1,8 +1,14 @@
 package ingestion
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,6 +39,37 @@ func setup() {
 
 func teardown() {
 	server.Close()
+}
+
+func formatReadCloser(r *io.ReadCloser) string {
+	if r == nil {
+		return ""
+	}
+	body, err := ioutil.ReadAll(*r)
+	if err != nil {
+		return ""
+	}
+	rdr1 := ioutil.NopCloser(bytes.NewBuffer(body))
+	*r = rdr1 // restore body
+
+	return string(body)
+}
+
+func areEqualJSON(s1, s2 string) (bool, error) {
+	var o1 interface{}
+	var o2 interface{}
+
+	var err error
+	err = json.Unmarshal([]byte(s1), &o1)
+	if err != nil {
+		return false, fmt.Errorf("Error mashalling string 1 :: %s", err.Error())
+	}
+	err = json.Unmarshal([]byte(s2), &o2)
+	if err != nil {
+		return false, fmt.Errorf("Error mashalling string 2 :: %s", err.Error())
+	}
+
+	return reflect.DeepEqual(o1, o2), nil
 }
 
 func Test_int64ArrayToCSV(t *testing.T) {
