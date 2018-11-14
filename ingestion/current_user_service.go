@@ -11,5 +11,10 @@ type currentUserService struct {
 }
 
 func (cu *currentUserService) Retrieve() (result User, err error) {
+	req, err := cu.client.newRequest("GET", "partner/current_user", nil, nil)
+	if err != nil {
+		return
+	}
+	err = cu.client.do(req, &result)
 	return
 }
