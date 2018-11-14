@@ -95,3 +95,109 @@ func Test_int64ArrayToCSV(t *testing.T) {
 		})
 	}
 }
+
+func Test_do_client_error(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/client-error", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			t.Fatalf("unexpected method: %s", r.Method)
+		}
+		w.WriteHeader(400)
+		io.WriteString(w, `
+		{
+			"errors": [
+				{
+					"message": "Your request included invalid JSON.",
+					"field": "email"
+				}
+			]
+		}
+		`)
+	})
+
+	test := struct {
+		wantErr       bool
+		wantErrorType error
+	}{
+		wantErr:       true,
+		wantErrorType: ClientError{},
+	}
+
+	var result interface{}
+	req, err := client.newRequest("GET", "client-error", nil, nil)
+	if err != nil {
+		return
+	}
+	err = client.do(req, &result)
+	switch test.wantErr {
+	case true:
+		assert.Error(t, err)
+		assert.IsType(t, test.wantErrorType, err)
+	case false:
+		assert.NoError(t, err)
+	}
+
+	clientError, _ := IsClientError(err)
+	assert.Equal(t, ClientError{
+		Errors: []Error{
+			Error{
+				Message: "Your request included invalid JSON.",
+				Field:   "email",
+			},
+		},
+	}, clientError)
+}
+
+func Test_do_server_error(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/server-error", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			t.Fatalf("unexpected method: %s", r.Method)
+		}
+		w.WriteHeader(500)
+		io.WriteString(w, `
+		{
+			"errors": [
+				{
+					"message": "Your request included invalid JSON.",
+					"field": "email"
+				}
+			]
+		}
+		`)
+	})
+
+	test := struct {
+		wantErr       bool
+		wantErrorType error
+	}{
+		wantErr:       true,
+		wantErrorType: ServerError{},
+	}
+
+	var result interface{}
+	req, err := client.newRequest("GET", "server-error", nil, nil)
+	if err != nil {
+		return
+	}
+	err = client.do(req, &result)
+	switch test.wantErr {
+	case true:
+		assert.Error(t, err)
+		assert.IsType(t, test.wantErrorType, err)
+	case false:
+		assert.NoError(t, err)
+	}
+
+	serverError, _ := IsServerError(err)
+	assert.Equal(t, ServerError{
+		Errors: []Error{
+			Error{
+				Message: "Your request included invalid JSON.",
+				Field:   "email",
+			},
+		},
+	}, serverError)
+}
