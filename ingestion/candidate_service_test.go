@@ -11,6 +11,36 @@ import (
 func Test_candidateService_Retrieve(t *testing.T) {
 	setup()
 	defer teardown()
+
+	type args struct {
+		ids []int64
+	}
+	test := struct {
+		args           args
+		wantCandidates []Candidate
+		wantErr        bool
+	}{
+		args: args{
+			ids: []int64{12},
+		},
+		wantCandidates: []Candidate{
+			Candidate{
+				ID:         17681532,
+				Name:       "Harry Potter",
+				ExternalID: "24680",
+				Applications: []Application{
+					Application{
+						ID:         59724,
+						Job:        "Auror",
+						Status:     "Active",
+						Stage:      "Application Review",
+						ProfileURL: "https://app.greenhouse.io/people/17681532?application_id=26234709",
+					},
+				},
+			},
+		},
+	}
+
 	mux.HandleFunc("/v1/partner/candidates", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			t.Fatalf("unexpected method: %s", r.Method)
@@ -36,41 +66,6 @@ func Test_candidateService_Retrieve(t *testing.T) {
 		`)
 	})
 
-	type fields struct {
-		client *Client
-	}
-	type args struct {
-		ids []int64
-	}
-	test := struct {
-		name           string
-		args           args
-		wantCandidates []Candidate
-		wantErr        bool
-	}{
-
-		name: "Test parse",
-		args: args{
-			ids: []int64{12},
-		},
-		wantCandidates: []Candidate{
-			Candidate{
-				ID:         17681532,
-				Name:       "Harry Potter",
-				ExternalID: "24680",
-				Applications: []Application{
-					Application{
-						ID:         59724,
-						Job:        "Auror",
-						Status:     "Active",
-						Stage:      "Application Review",
-						ProfileURL: "https://app.greenhouse.io/people/17681532?application_id=26234709",
-					},
-				},
-			},
-		},
-	}
-
 	gotCandidates, err := client.Candidates.Retrieve(test.args.ids)
 
 	switch test.wantErr {
@@ -86,20 +81,16 @@ func Test_candidateService_Retrieve(t *testing.T) {
 func Test_candidateService_Post(t *testing.T) {
 	setup()
 	defer teardown()
-	type fields struct {
-		client *Client
-	}
+
 	type args struct {
 		candidates []PostCandidate
 	}
 	test := struct {
-		name           string
 		args           args
 		reqBody        string
 		wantCandidates []PostCandidateResponse
 		wantErr        bool
 	}{
-		name:    "Test parse",
 		reqBody: `[{"prospect":true,"first_name":"Harry","last_name":"Potter","company":"Hogwarts","title":"Student","resume":"https://hogwarts.com/resume","phone_numbers":[{"phone_number":"123-456-7890","type":"home"}],"emails":[{"email":"hpotter@hogwarts.edu","type":"other"}],"social_media":[{"url":"https://twitter.com/hp"}],"websites":[{"url":"https://harrypotter.com","type":"blog"}],"addresses":[{"address":"4 Privet Dr","type":"home"}],"job_id":12345,"external_id":"24680","notes":"Good at Quiddich","prospect_pool_id":123,"prospect_pool_stage_id":456,"prospect_owner_email":"prospect_owners_email@example.com"}]`,
 		args: args{
 			candidates: []PostCandidate{
