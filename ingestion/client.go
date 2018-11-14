@@ -105,11 +105,15 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 	defer resp.Body.Close()
 
 	if r, err := isError(resp); r && err == nil {
-		if r, err := isClientError(resp); r && err == nil {
-			v = ClientError{}
+		if r, err = isClientError(resp); r && err == nil {
+			clientError := ClientError{}
+			readJSON(resp.Body, &clientError)
+			return clientError
 		}
-		if r, err := isServerError(resp); r && err == nil {
-			v = ServerError{}
+		if r, err = isServerError(resp); r && err == nil {
+			serverError := ServerError{}
+			readJSON(resp.Body, &serverError)
+			return serverError
 		}
 	} else if err != nil {
 		return err

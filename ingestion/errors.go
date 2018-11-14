@@ -15,7 +15,7 @@ type Error struct {
 	Field   string `json:"field"`
 }
 type ClientError struct {
-	Errors Error `json:"errors"`
+	Errors []Error `json:"errors"`
 }
 
 func (e ClientError) Error() string {
@@ -23,7 +23,7 @@ func (e ClientError) Error() string {
 }
 
 type ServerError struct {
-	Errors Error `json:"errors"`
+	Errors []Error `json:"errors"`
 }
 
 func (e ServerError) Error() string {
