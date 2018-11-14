@@ -1,6 +1,6 @@
 package ingestion
 
-type TrackingLinkResponse struct {
+type PostTrackingLinkResponse struct {
 	TrackingLink string `json:"tracking_link"`
 	Job          string `json:"job"`
 	Source       string `json:"source"`

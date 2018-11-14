@@ -71,6 +71,12 @@ func areEqualJSON(s1, s2 string) (bool, error) {
 	return reflect.DeepEqual(o1, o2), nil
 }
 
+func jsonStringAsInterface(s string) (interface{}, error) {
+	var o1 interface{}
+	err := json.Unmarshal([]byte(s), &o1)
+	return o1, err
+}
+
 func Test_int64ArrayToCSV(t *testing.T) {
 	type args struct {
 		a []int64

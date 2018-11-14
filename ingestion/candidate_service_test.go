@@ -156,7 +156,11 @@ func Test_candidateService_Post(t *testing.T) {
 		equal, err := areEqualJSON(test.reqBody, body)
 		assert.NoError(t, err)
 		if !equal {
-			assert.Equal(t, test.reqBody, body) //just to get the diff
+			o1, err := jsonStringAsInterface(test.reqBody)
+			assert.NoError(t, err)
+			o2, err := jsonStringAsInterface(body)
+			assert.NoError(t, err)
+			assert.Equal(t, o1, o2) //just to get the diff
 		}
 		w.WriteHeader(200)
 		io.WriteString(w, `
@@ -180,5 +184,4 @@ func Test_candidateService_Post(t *testing.T) {
 		assert.NoError(t, err)
 	}
 	assert.Equal(t, test.wantCandidates, gotCandidates)
-
 }
