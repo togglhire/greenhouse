@@ -58,3 +58,15 @@ func isServerError(r *http.Response) (bool, error) {
 	}
 	return r.StatusCode >= 500 && r.StatusCode <= 599, nil
 }
+
+// IsClientError checks whether the error was a Client error or not. If it was a client error, the first return param is the value.
+func IsClientError(err interface{}) (ClientError, bool) {
+	s, ok := err.(ClientError)
+	return s, ok
+}
+
+// IsServerError checks whether the error was a Server error or not. If it was a server error, the first return param is the value.
+func IsServerError(err interface{}) (ServerError, bool) {
+	s, ok := err.(ServerError)
+	return s, ok
+}
