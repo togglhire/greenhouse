@@ -34,7 +34,7 @@ func setup() {
 	server = httptest.NewServer(mux)
 
 	client = NewClient("access_token", nil)
-	client.BaseURL = server.URL + "/"
+	client.baseURL = server.URL + "/"
 }
 
 func teardown() {
@@ -211,4 +211,22 @@ func Test_do_server_error(t *testing.T) {
 
 	serverError, _ := IsServerError(err)
 	assert.Equal(t, test.serverError, serverError)
+}
+
+func TestClient_newRequest_header_OAuth(t *testing.T) {
+	client = NewClient("12345", nil)
+	req, err := client.newRequest("GET", "/", nil, nil)
+	assert.NoError(t, err)
+	authHeader := req.Header.Get("Authorization")
+	assert.Equal(t, "Bearer 12345", authHeader)
+}
+
+func TestClient_newRequest_header_BasicAuth(t *testing.T) {
+	client = NewClientBasicAuth("apiKey", "john.smith@example.com", nil)
+	req, err := client.newRequest("GET", "/", nil, nil)
+	assert.NoError(t, err)
+	authHeader := req.Header.Get("Authorization")
+	assert.Equal(t, "Basic YXBpS2V5:", authHeader)
+	onBehalfOfHeader := req.Header.Get("On-Behalf-Of")
+	assert.Equal(t, "john.smith@example.com", onBehalfOfHeader)
 }

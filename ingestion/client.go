@@ -2,6 +2,7 @@ package ingestion
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -17,11 +18,15 @@ type Client struct {
 	// client is the HTTP Client used to communicate with the API.
 	client *http.Client
 
-	// The access token you received once the OAuth process is complete and the user grants the partner permission to access their data on Greenhouse
+	// OAuth, The access token you received once the OAuth process is complete and the user grants the partner permission to access their data on Greenhouse
 	accessToken string
 
+	// Basic Auth
+	apiKey     string
+	onBehalfOf string
+
 	// BaseURL is the base url for api requests.
-	BaseURL string
+	baseURL string
 
 	// Services used for talking with different parts of the Greenhouse API
 	Candidates    CandidateService
@@ -32,6 +37,14 @@ type Client struct {
 
 // NewClient returns a new instance of *Client.
 func NewClient(accessToken string, httpClient *http.Client) *Client {
+	return newClient(accessToken, "", "", httpClient)
+}
+
+func NewClientBasicAuth(apiKey string, onBehalfOf string, httpClient *http.Client) *Client {
+	return newClient("", apiKey, onBehalfOf, httpClient)
+}
+
+func newClient(accessToken, apiKey, onBehalfOf string, httpClient *http.Client) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -39,7 +52,9 @@ func NewClient(accessToken string, httpClient *http.Client) *Client {
 	client := &Client{
 		client:      httpClient,
 		accessToken: accessToken,
-		BaseURL:     defaultBaseURL,
+		baseURL:     defaultBaseURL,
+		apiKey:      apiKey,
+		onBehalfOf:  onBehalfOf,
 	}
 
 	//Services
@@ -63,7 +78,7 @@ type Params map[string]interface{}
 // newRequest creates an authenticated API request that is ready to send.
 func (c *Client) newRequest(method string, endpoint string, params Params, body interface{}) (*http.Request, error) {
 	method = strings.ToUpper(method)
-	requestURL := fmt.Sprintf("%sv1/%s", c.BaseURL, endpoint)
+	requestURL := fmt.Sprintf("%sv1/%s", c.baseURL, endpoint)
 
 	// Query String
 	qs := url.Values{}
@@ -86,7 +101,16 @@ func (c *Client) newRequest(method string, endpoint string, params Params, body 
 
 	req, err := http.NewRequest(method, requestURL, &buf)
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.accessToken))
+	if c.accessToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.accessToken))
+	}
+	if c.apiKey != "" && c.onBehalfOf != "" {
+		enc := base64.StdEncoding.EncodeToString([]byte(c.apiKey))
+		req.Header.Set("Authorization", fmt.Sprintf("Basic %s:", enc))
+		req.Header.Set("On-Behalf-Of", c.onBehalfOf)
+
+	}
+
 	if req.Method == "POST" || req.Method == "PUT" {
 		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
