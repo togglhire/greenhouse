@@ -31,7 +31,7 @@ func (o *oauthService) CreateAuthURL(consumerKey string, scopes []OAuthScope, re
 		q.Add("scope", spaceDelimit(scopes))
 	}
 	if redirectURI != "" {
-		q.Add("redirect_uri", state)
+		q.Add("redirect_uri", redirectURI)
 	}
 	if state != "" {
 		q.Add("state", state)
