@@ -11,9 +11,11 @@ import (
 	"strings"
 )
 
-const defaultBaseURL = "https://api.greenhouse.io/"
-const accessTokenURL = "https://api.greenhouse.io/oauth/token"
-const authorizeURL = "https://api.greenhouse.io/oauth/authorize"
+const (
+	defaultBaseURL = "https://api.greenhouse.io/"
+	accessTokenURL = "https://api.greenhouse.io/oauth/token"
+	authorizeURL   = "https://api.greenhouse.io/oauth/authorize"
+)
 
 // Client manages communication with the Greenhouse API.
 type Client struct {
