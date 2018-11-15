@@ -36,6 +36,7 @@ func (o *oauthService) CreateAuthURL(consumerKey string, scopes []OAuthScope, re
 	if state != "" {
 		q.Add("state", state)
 	}
+	q.Add("response_type", "code")
 	greenhouseAuthURL.RawQuery = q.Encode()
 	return greenhouseAuthURL.String(), nil
 }
