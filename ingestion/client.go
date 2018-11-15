@@ -12,6 +12,8 @@ import (
 )
 
 const defaultBaseURL = "https://api.greenhouse.io/"
+const accessTokenURL = "https://api.greenhouse.io/oauth/token"
+const authorizeURL = "https://api.greenhouse.io/oauth/authorize"
 
 // Client manages communication with the Greenhouse API.
 type Client struct {
@@ -126,8 +128,12 @@ func (c *Client) newRequest(method string, endpoint string, params Params, body 
 // It returns a Response object that provides a wrapper around http.Response
 // with some convenience methods.
 func (c *Client) do(req *http.Request, v interface{}) error {
+	return do(c.client, req, v)
+}
+
+func do(client *http.Client, req *http.Request, v interface{}) error {
 	req.Close = true
-	resp, err := c.client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}

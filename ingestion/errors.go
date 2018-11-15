@@ -11,6 +11,8 @@ var (
 	ErrNotImplemented     = errors.New("not implemented")
 	ErrShouldNotBeNil     = errors.New("should not be nil")
 	ErrConsumerKeyMissing = errors.New("consumer key is missing")
+	ErrCodeMissing        = errors.New("code is missing")
+	ErrRequestURINil      = errors.New("request uri is nil")
 )
 
 type Error struct {
