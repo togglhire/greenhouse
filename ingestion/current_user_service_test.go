@@ -46,5 +46,4 @@ func Test_currentUserService_Retrieve(t *testing.T) {
 		assert.NoError(t, err)
 	}
 	assert.Equal(t, test.wantUser, gotUser)
-
 }

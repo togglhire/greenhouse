@@ -77,9 +77,9 @@ func jsonStringAsInterface(s string) (interface{}, error) {
 	return o1, err
 }
 
-func Test_int64ArrayToCSV(t *testing.T) {
+func Test_interfaceToCSV(t *testing.T) {
 	type args struct {
-		a []int64
+		a interface{}
 	}
 	tests := []struct {
 		name string
@@ -87,20 +87,57 @@ func Test_int64ArrayToCSV(t *testing.T) {
 		want string
 	}{
 		{
-			name: "A",
+			name: "[]int64",
 			args: args{
 				a: []int64{2, 3, 4, 5},
 			},
 			want: "2,3,4,5",
 		},
+		{
+			name: "[]string",
+			args: args{
+				a: []string{"candidates.create", "candidates.view", "jobs.view"},
+			},
+			want: "candidates.create,candidates.view,jobs.view",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, int64ArrayToCSV(tt.args.a))
+			assert.Equal(t, tt.want, interfaceToCSV(tt.args.a))
 		})
 	}
 }
 
+func Test_spaceDelimit(t *testing.T) {
+	type args struct {
+		a interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "[]int64",
+			args: args{
+				a: []int64{2, 3, 4, 5},
+			},
+			want: "2 3 4 5",
+		},
+		{
+			name: "[]string",
+			args: args{
+				a: []string{"candidates.create", "candidates.view", "jobs.view"},
+			},
+			want: "candidates.create candidates.view jobs.view",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, spaceDelimit(tt.args.a))
+		})
+	}
+}
 func Test_do_client_error(t *testing.T) {
 	setup()
 	defer teardown()

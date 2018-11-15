@@ -7,8 +7,11 @@ import (
 )
 
 // ErrNotImplemented is used for returning errors
-var ErrNotImplemented = errors.New("Not implemented")
-var ErrShouldNotBeNil = errors.New("Should not be nil")
+var (
+	ErrNotImplemented     = errors.New("not implemented")
+	ErrShouldNotBeNil     = errors.New("should not be nil")
+	ErrConsumerKeyMissing = errors.New("consumer key is missing")
+)
 
 type Error struct {
 	Message string `json:"message"`

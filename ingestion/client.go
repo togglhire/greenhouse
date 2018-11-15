@@ -29,6 +29,7 @@ type Client struct {
 	baseURL string
 
 	// Services used for talking with different parts of the Greenhouse API
+	OAuth         OAuthService
 	Candidates    CandidateService
 	CurrentUser   CurrentUserService
 	Jobs          JobService
@@ -58,6 +59,7 @@ func newClient(accessToken, apiKey, onBehalfOf string, httpClient *http.Client) 
 	}
 
 	//Services
+	client.OAuth = &oauthService{}
 	client.Candidates = &candidateService{client: client}
 	client.CurrentUser = &currentUserService{client: client}
 	client.Jobs = &jobService{client: client}
@@ -163,6 +165,9 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 	return err
 }
 
-func int64ArrayToCSV(a []int64) string {
+func interfaceToCSV(a interface{}) string {
 	return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), ","), "[]")
+}
+func spaceDelimit(a interface{}) string {
+	return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), " "), "[]")
 }

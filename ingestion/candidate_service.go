@@ -13,7 +13,7 @@ type candidateService struct {
 
 func (s *candidateService) Retrieve(ids []int64) (result []Candidate, err error) {
 	params := Params{
-		"candidate_ids": int64ArrayToCSV,
+		"candidate_ids": interfaceToCSV(ids),
 	}
 	req, err := s.client.newRequest("GET", "partner/candidates", params, nil)
 	if err != nil {
