@@ -1,11 +1,9 @@
 package ingestion
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -39,20 +37,6 @@ func setup() {
 
 func teardown() {
 	server.Close()
-}
-
-func formatReadCloser(r *io.ReadCloser) string {
-	if r == nil {
-		return ""
-	}
-	body, err := ioutil.ReadAll(*r)
-	if err != nil {
-		return ""
-	}
-	rdr1 := ioutil.NopCloser(bytes.NewBuffer(body))
-	*r = rdr1 // restore body
-
-	return string(body)
 }
 
 func areEqualJSON(s1, s2 string) (bool, error) {

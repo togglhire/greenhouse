@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -178,4 +179,18 @@ func interfaceToCSV(a interface{}) string {
 }
 func spaceDelimit(a interface{}) string {
 	return strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a)), " "), "[]")
+}
+
+func formatReadCloser(r *io.ReadCloser) string {
+	if r == nil {
+		return ""
+	}
+	body, err := ioutil.ReadAll(*r)
+	if err != nil {
+		return ""
+	}
+	rdr1 := ioutil.NopCloser(bytes.NewBuffer(body))
+	*r = rdr1 // restore body
+
+	return string(body)
 }
