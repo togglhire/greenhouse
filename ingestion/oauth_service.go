@@ -7,7 +7,7 @@ import (
 var _ OAuthService = &oauthService{}
 
 type OAuthService interface {
-	CreateAuthURL(consumerKey string, scopes []OAuthScope, state string) (string, error)
+	CreateAuthURL(consumerKey string, scopes []OAuthScope, redirectURI, state string) (string, error)
 }
 
 type oauthService struct {
@@ -17,7 +17,7 @@ func NewOAuthService() OAuthService {
 	return &oauthService{}
 }
 
-func (o *oauthService) CreateAuthURL(consumerKey string, scopes []OAuthScope, state string) (result string, err error) {
+func (o *oauthService) CreateAuthURL(consumerKey string, scopes []OAuthScope, redirectURI, state string) (result string, err error) {
 	if consumerKey == "" {
 		return "", ErrConsumerKeyMissing
 	}
@@ -29,6 +29,9 @@ func (o *oauthService) CreateAuthURL(consumerKey string, scopes []OAuthScope, st
 	q.Add("client_id", consumerKey)
 	if len(scopes) != 0 {
 		q.Add("scope", spaceDelimit(scopes))
+	}
+	if redirectURI != "" {
+		q.Add("redirect_uri", state)
 	}
 	if state != "" {
 		q.Add("state", state)
