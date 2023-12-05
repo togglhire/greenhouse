@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -98,8 +99,7 @@ func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseUR
 func (c *Client) newRequest(method string, endpointPath string, params url.Values, body interface{}) (*http.Request, error) {
 	method = strings.ToUpper(method)
 	if validMethod(method) {
-		// ERROR
-		return nil, fmt.Errorf("invalid method %s", method)
+		return nil, NewSDKError("invalid method provided")
 	}
 	requestURL := fmt.Sprintf("%s/%s", c.baseURL, endpointPath)
 
@@ -111,7 +111,7 @@ func (c *Client) newRequest(method string, endpointPath string, params url.Value
 	if body != nil {
 		err := json.NewEncoder(&buf).Encode(body)
 		if err != nil {
-			return nil, err
+			return nil, NewSDKError("error encoding body")
 		}
 	}
 
@@ -132,43 +132,25 @@ func (c *Client) newRequest(method string, endpointPath string, params url.Value
 }
 
 func (c *Client) do(req *http.Request, v interface{}) error {
-	// req.Close = true
-	// resp, err := client.Do(req)
-	// if err != nil {
-	// 	return err
-	// }
-	// if resp == nil {
-	// 	return ErrShouldNotBeNil
-	// }
-	// defer resp.Body.Close()
+	req.Close = true
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return NewSDKError(fmt.Sprintf("error making request: %v", err))
+	}
+	if resp == nil {
+		return NewSDKError("response should not be nil")
+	}
+	defer resp.Body.Close()
 
-	// if r, err := isError(resp); r && err == nil {
-	// 	if r, err = isClientError(resp); r && err == nil {
-	// 		clientError := ClientError{
-	// 			StatusCode: resp.StatusCode,
-	// 		}
-	// 		err = readJSON(resp.Body, &clientError)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		return clientError
-	// 	}
-	// 	if r, err = isServerError(resp); r && err == nil {
-	// 		serverError := ServerError{
-	// 			StatusCode: resp.StatusCode,
-	// 		}
-	// 		err = readJSON(resp.Body, &serverError)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		return serverError
-	// 	}
-	// } else if err != nil {
-	// 	return err
-	// }
+	isErrResp, err := isErrorResponse(resp)
+	if isErrResp {
+		return err
+	}
 
-	// err = readJSON(resp.Body, &v)
-	// return err
+	if err := readJSON(resp.Body, v); err != nil {
+		return NewSDKError(fmt.Sprintf("error decoding response: %v", err))
+	}
+
 	return nil
 }
 
@@ -185,4 +167,8 @@ func methodSendsBody(method string) bool {
 		return true
 	}
 	return false
+}
+
+func readJSON(r io.ReadCloser, v interface{}) error {
+	return json.NewDecoder(r).Decode(v)
 }
