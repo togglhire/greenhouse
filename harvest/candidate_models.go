@@ -6,6 +6,7 @@ type Candidate struct {
 	LastName             string                         `json:"last_name"`
 	Company              string                         `json:"company,omitempty"`
 	Title                string                         `json:"title,omitempty"`
+	IsPrivate            PrivateType                    `json:"is_private,omitempty"`
 	PhoneNumbers         []KeyValue[PhoneNumberType]    `json:"phone_numbers,omitempty"`
 	Addresses            []KeyValue[AddressType]        `json:"address,omitempty"`
 	EmailAddresses       []KeyValue[EmailAddressType]   `json:"email_addresses,omitempty"`
@@ -14,8 +15,15 @@ type Candidate struct {
 	Educations           []Education                    `json:"educations,omitempty"`
 	Employments          []Employment                   `json:"employments,omitempty"`
 	Tags                 []string                       `json:"tags,omitempty"`
-	// still missing some fields
+	// TODO: Other fields
 }
+
+type PrivateType string
+
+const (
+	PTTrue  PrivateType = "true"
+	PTFalse PrivateType = "false"
+)
 
 type KeyValueType interface {
 	PhoneNumberType | AddressType | EmailAddressType | WebsiteAddressType | string

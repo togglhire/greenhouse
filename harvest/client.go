@@ -64,8 +64,12 @@ type Client struct {
 	Jobs       JobsService
 }
 
-func NewClient(apiKey string, onBehalfOf string, httpClient *http.Client) (*Client, error) {
+func NewDefaultClient(apiKey string, onBehalfOf string, httpClient *http.Client) (*Client, error) {
 	return newClient(apiKey, onBehalfOf, httpClient, DEFAULT_BASE_URL, V1)
+}
+
+func NewClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseURL string, apiVersion Version) (*Client, error) {
+	return newClient(apiKey, onBehalfOf, httpClient, baseURL, apiVersion)
 }
 
 func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseURL string, apiVersion Version) (*Client, error) {
@@ -100,7 +104,7 @@ func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseUR
 
 func (c *Client) newRequest(method string, endpointPath string, params url.Values, body interface{}) (*http.Request, error) {
 	method = strings.ToUpper(method)
-	if validMethod(method) {
+	if isValidMethod(method) {
 		return nil, NewSDKError("invalid method provided")
 	}
 	requestURL := fmt.Sprintf("%s/%s", c.baseURL, endpointPath)
@@ -140,7 +144,7 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 		return NewSDKError(fmt.Sprintf("error making request: %v", err))
 	}
 	if resp == nil {
-		return NewSDKError("response should not be nil")
+		return NewSDKError("could not get a response, response is nil")
 	}
 	defer resp.Body.Close()
 
@@ -157,7 +161,7 @@ func (c *Client) do(req *http.Request, v interface{}) error {
 }
 
 // Move to utils file
-func validMethod(method string) bool {
+func isValidMethod(method string) bool {
 	if method == http.MethodGet || method == http.MethodPost || method == http.MethodPatch || method == http.MethodDelete {
 		return false
 	}
@@ -205,7 +209,6 @@ func convertValueToString(value interface{}) string {
 		return strconv.FormatInt(v, 10)
 	case string:
 		return v
-	// Add more type cases as needed
 	default:
 		// Fallback to fmt.Sprintf for unsupported types
 		return fmt.Sprintf("%v", v)

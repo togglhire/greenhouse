@@ -7,6 +7,7 @@ const (
 )
 
 type JobsService interface {
+	// An alternative would be allowing users to pass a map of string to interface{}.
 	List(ListJobsQueryParams) ([]Job, error)
 	Retrieve(int64) (*Job, error)
 }
