@@ -30,7 +30,7 @@ func NewCandidatesService(client *Client) *candidateService {
 
 // Slice of Candidates or Slice of pointers to Candidates?
 func (s *candidateService) List(queryParams ListCandidatesQueryParams) ([]Candidate, error) {
-	params := ListCandidatesQueryParamsToURLValues(queryParams)
+	params := structToURLValues(queryParams)
 	request, err := s.client.newRequest(http.MethodGet, CANDIDATES, params, nil)
 	if err != nil {
 		return nil, err

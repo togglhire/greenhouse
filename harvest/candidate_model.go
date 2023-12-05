@@ -1,10 +1,5 @@
 package harvest
 
-import (
-	"net/url"
-	"reflect"
-)
-
 type Candidate struct {
 	Id                   int64                          `json:"id,omitempty"`
 	FirstName            string                         `json:"first_name"`
@@ -122,23 +117,4 @@ type ListCandidatesQueryParams struct {
 	JobId         int64  `url:"job_id,omitempty"`
 	Email         string `url:"email,omitempty"`
 	CandidateIds  string `url:"candidate_ids,omitempty"`
-}
-
-// utils
-func ListCandidatesQueryParamsToURLValues(data interface{}) url.Values {
-	values := url.Values{}
-	val := reflect.ValueOf(data)
-	typ := reflect.TypeOf(data)
-
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		tag := typ.Field(i).Tag.Get("url")
-		if field.IsZero() && tag == "omitempty" {
-			continue
-		}
-
-		values.Add(tag, field.String())
-	}
-
-	return values
 }

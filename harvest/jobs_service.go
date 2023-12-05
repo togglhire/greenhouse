@@ -20,7 +20,7 @@ func NewJobsService(client *Client) *jobService {
 }
 
 func (s *jobService) List(params ListJobsQueryParams) ([]Job, error) {
-	request, err := s.client.newRequest("GET", JOBS, ListJobsQueryParamsToURLValues(params), nil)
+	request, err := s.client.newRequest("GET", JOBS, structToURLValues(params), nil)
 	if err != nil {
 		return nil, err
 	}

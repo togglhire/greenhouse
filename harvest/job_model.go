@@ -1,10 +1,5 @@
 package harvest
 
-import (
-	"net/url"
-	"reflect"
-)
-
 type JobStatus string
 
 const (
@@ -34,23 +29,4 @@ type ListJobsQueryParams struct {
 	OfficeId             string `url:"office_id,omitempty"`
 	ExternalOfficeId     string `url:"external_office_id,omitempty"`
 	CustomFieldOptionId  string `url:"custom_field_option_id,omitempty"`
-}
-
-// utils
-func ListJobsQueryParamsToURLValues(data interface{}) url.Values {
-	values := url.Values{}
-	val := reflect.ValueOf(data)
-	typ := reflect.TypeOf(data)
-
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		tag := typ.Field(i).Tag.Get("url")
-		if field.IsZero() && tag == "omitempty" {
-			continue
-		}
-
-		values.Add(tag, field.String())
-	}
-
-	return values
 }
