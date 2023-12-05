@@ -62,13 +62,13 @@ type Client struct {
 	Jobs       JobsService
 }
 
-func NewClient(apiKey string, onBehalfOf string, httpClient *http.Client) *Client {
+func NewClient(apiKey string, onBehalfOf string, httpClient *http.Client) (*Client, error) {
 	return newClient(apiKey, onBehalfOf, httpClient, DEFAULT_BASE_URL, V1)
 }
 
-func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseURL string, apiVersion Version) *Client {
+func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseURL string, apiVersion Version) (*Client, error) {
 	if apiKey == "" {
-		panic("apiKey cannot be empty") // Handle error
+		return nil, NewSDKError("api key is required")
 	}
 
 	if httpClient == nil {
@@ -93,7 +93,7 @@ func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseUR
 	client.Candidates = candidatesService
 	client.Jobs = jobsService
 
-	return client
+	return client, nil
 }
 
 func (c *Client) newRequest(method string, endpointPath string, params url.Values, body interface{}) (*http.Request, error) {

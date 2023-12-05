@@ -31,15 +31,15 @@ func NewCandidatesService(client *Client) *candidateService {
 // Slice of Candidates or Slice of pointers to Candidates?
 func (s *candidateService) List(queryParams ListCandidatesQueryParams) ([]Candidate, error) {
 	params := ListCandidatesQueryParamsToURLValues(queryParams)
-	request, err := s.client.newRequest(http.MethodGet, fmt.Sprintf("%s/", CANDIDATES), params, nil)
+	request, err := s.client.newRequest(http.MethodGet, CANDIDATES, params, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	candidate := make([]Candidate, 0)
-	err = s.client.do(request, candidate)
+	candidates := make([]Candidate, 0)
+	err = s.client.do(request, candidates)
 
-	return candidate, err
+	return candidates, err
 }
 
 func (s *candidateService) Retrieve(id int64) (*Candidate, error) {
@@ -55,7 +55,7 @@ func (s *candidateService) Retrieve(id int64) (*Candidate, error) {
 }
 
 func (s *candidateService) Add(candidate *Candidate) error {
-	request, err := s.client.newRequest(http.MethodPost, fmt.Sprintf("%s/", CANDIDATES), nil, candidate)
+	request, err := s.client.newRequest(http.MethodPost, CANDIDATES, nil, candidate)
 	if err != nil {
 		return err
 	}

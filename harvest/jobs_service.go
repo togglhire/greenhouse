@@ -1,7 +1,13 @@
 package harvest
 
+import "fmt"
+
+const (
+	JOBS = "jobs"
+)
+
 type JobsService interface {
-	// List() ([]Job, error)
+	List(ListJobsQueryParams) ([]Job, error)
 	Retrieve(int64) (*Job, error)
 }
 
@@ -13,8 +19,22 @@ func NewJobsService(client *Client) *jobService {
 	return &jobService{client}
 }
 
-func (s *jobService) Retrieve(Id int64) (*Job, error) {
-	_, err := s.client.newRequest("GET", "jobs/"+string(Id), nil, nil)
+func (s *jobService) List(params ListJobsQueryParams) ([]Job, error) {
+	request, err := s.client.newRequest("GET", JOBS, ListJobsQueryParamsToURLValues(params), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	jobs := make([]Job, 0)
+	if err = s.client.do(request, jobs); err != nil {
+		return nil, err
+	}
+
+	return jobs, err
+}
+
+func (s *jobService) Retrieve(id int64) (*Job, error) {
+	_, err := s.client.newRequest("GET", fmt.Sprintf("%s/%d", JOBS, id), nil, nil)
 	if err != nil {
 		return nil, err
 	}

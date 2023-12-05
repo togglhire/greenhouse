@@ -22,6 +22,7 @@ type Candidate struct {
 	// still missing some fields
 }
 
+// Can't be KeyValue because of the type field
 type KeyValue struct {
 	Value string `json:"value"`
 	Type  string `json:"type,omitempty"`
