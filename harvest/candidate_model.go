@@ -6,26 +6,65 @@ import (
 )
 
 type Candidate struct {
-	Id                   int64        `json:"id,omitempty"`
-	FirstName            string       `json:"first_name"`
-	LastName             string       `json:"last_name"`
-	Company              string       `json:"company,omitempty"`
-	Title                string       `json:"title,omitempty"`
-	PhoneNumbers         []KeyValue   `json:"phone_numbers,omitempty"`
-	Addresses            []KeyValue   `json:"address,omitempty"`
-	EmailAddresses       []KeyValue   `json:"email_addresses,omitempty"`
-	WebsiteAddresses     []KeyValue   `json:"website_addresses,omitempty"`
-	SocialMediaAddresses []KeyValue   `json:"social_media_addresses,omitempty"`
-	Educations           []Education  `json:"educations,omitempty"`
-	Employments          []Employment `json:"employments,omitempty"`
-	Tags                 []string     `json:"tags,omitempty"`
+	Id                   int64                          `json:"id,omitempty"`
+	FirstName            string                         `json:"first_name"`
+	LastName             string                         `json:"last_name"`
+	Company              string                         `json:"company,omitempty"`
+	Title                string                         `json:"title,omitempty"`
+	PhoneNumbers         []KeyValue[PhoneNumberType]    `json:"phone_numbers,omitempty"`
+	Addresses            []KeyValue[AddressType]        `json:"address,omitempty"`
+	EmailAddresses       []KeyValue[EmailAddressType]   `json:"email_addresses,omitempty"`
+	WebsiteAddresses     []KeyValue[WebsiteAddressType] `json:"website_addresses,omitempty"`
+	SocialMediaAddresses []KeyValue[string]             `json:"social_media_addresses,omitempty"`
+	Educations           []Education                    `json:"educations,omitempty"`
+	Employments          []Employment                   `json:"employments,omitempty"`
+	Tags                 []string                       `json:"tags,omitempty"`
 	// still missing some fields
 }
 
-// Can't be KeyValue because of the type field
-type KeyValue struct {
+type KeyValueType interface {
+	PhoneNumberType | AddressType | EmailAddressType | WebsiteAddressType | string
+}
+
+type PhoneNumberType string
+
+const (
+	PNHome   PhoneNumberType = "home"
+	PNWork   PhoneNumberType = "work"
+	PNMobile PhoneNumberType = "mobile"
+	PNSkype  PhoneNumberType = "skype"
+	PNOther  PhoneNumberType = "other"
+)
+
+type AddressType string
+
+const (
+	ATHome  AddressType = "home"
+	ATWork  AddressType = "work"
+	ATOther AddressType = "other"
+)
+
+type EmailAddressType string
+
+const (
+	EATHome  EmailAddressType = "home"
+	EATWork  EmailAddressType = "work"
+	EATOther EmailAddressType = "other"
+)
+
+type WebsiteAddressType string
+
+const (
+	WATPersonal  WebsiteAddressType = "personal"
+	WATCompany   WebsiteAddressType = "company"
+	WATPortfolio WebsiteAddressType = "portfolio"
+	WATBlog      WebsiteAddressType = "blog"
+	WATOther     WebsiteAddressType = "other"
+)
+
+type KeyValue[T KeyValueType] struct {
 	Value string `json:"value"`
-	Type  string `json:"type,omitempty"`
+	Type  T      `json:"type"`
 }
 
 type Education struct {
@@ -41,6 +80,36 @@ type Employment struct {
 	Title       string `json:"title,omitempty"`
 	StartDate   string `json:"start_date,omitempty"`
 	EndDate     string `json:"end_date,omitempty"`
+}
+
+type AttachmentType string
+
+const (
+	ATResume      AttachmentType = "resume"
+	ATCoverLetter AttachmentType = "cover_letter"
+	ATAdminOnly   AttachmentType = "admin_only"
+)
+
+type Attachment struct {
+	Filename string         `json:"filename"`
+	Type     AttachmentType `json:"type"`
+	Content  string         `json:"content,omitempty"`
+	URL      string         `json:"url,omitempty"`
+	ContentT string         `json:"content_type,omitempty"`
+}
+
+type NoteVisibility string
+
+const (
+	NVAdminOnly NoteVisibility = "admin_only"
+	NVPrivate   NoteVisibility = "private"
+	NVPublic    NoteVisibility = "public"
+)
+
+type Note struct {
+	UserId     int64          `json:"user,omitempty"`
+	Body       string         `json:"body,omitempty"`
+	Visibility NoteVisibility `json:"visibility"`
 }
 
 type ListCandidatesQueryParams struct {
