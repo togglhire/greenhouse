@@ -1,0 +1,188 @@
+package harvest
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+)
+
+const (
+	DEFAULT_BASE_URL         = "https://harvest.greenhouse.io/"
+	AUTH_HEADER_KEY          = "Authorization"
+	CONTENT_TYPE_HEADER_KEY  = "Content-Type"
+	ON_BEAHALF_OF_HEADER_KEY = "On-Behalf-Of"
+)
+
+type Version string
+
+const (
+	V1 Version = "v1"
+)
+
+// type ClientConfig struct {
+// 	// HTTP client used to communicate with the Harvest API.
+// 	HttpClient *http.Client
+
+// 	// Base URL for API requests.
+// 	BaseURL string
+
+// 	// Revision of the Harvest API to use.
+// 	ApiVersion Version
+
+// 	// Harvest API apiKey
+// 	ApiKey string
+
+// 	// On-Behalf-Of header value
+// 	OnBehalfOf string
+// }
+
+type Client struct {
+	// HTTP client used to communicate with the Harvest API.
+	client *http.Client
+
+	// Base URL for API requests.
+	baseURL string
+
+	// Revision of the Harvest API to use.
+	apiVersion Version
+
+	// Harvest API apiKey
+	apiKey string
+
+	// On-Behalf-Of header value
+	onBehalfOf string
+
+	// Services used for talking to different parts of the Harvest API.
+	Candidates CandidatesService
+	Jobs       JobsService
+}
+
+func NewClient(apiKey string, onBehalfOf string, httpClient *http.Client) *Client {
+	return newClient(apiKey, onBehalfOf, httpClient, DEFAULT_BASE_URL, V1)
+}
+
+func newClient(apiKey string, onBehalfOf string, httpClient *http.Client, baseURL string, apiVersion Version) *Client {
+	if apiKey == "" {
+		panic("apiKey cannot be empty") // Handle error
+	}
+
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+
+	client := &Client{
+		client:     httpClient,
+		baseURL:    baseURL + string(apiVersion) + "/",
+		apiKey:     apiKey,
+		onBehalfOf: onBehalfOf,
+	}
+
+	var candidatesService CandidatesService
+	var jobsService JobsService
+	if apiVersion == V1 {
+		candidatesService = NewCandidatesService(client)
+		jobsService = NewJobsService(client)
+	} // else if apiVersion == V2 {
+	// }
+
+	client.Candidates = candidatesService
+	client.Jobs = jobsService
+
+	return client
+}
+
+func (c *Client) newRequest(method string, endpointPath string, params url.Values, body interface{}) (*http.Request, error) {
+	method = strings.ToUpper(method)
+	if validMethod(method) {
+		// ERROR
+		return nil, fmt.Errorf("invalid method %s", method)
+	}
+	requestURL := fmt.Sprintf("%s/%s", c.baseURL, endpointPath)
+
+	if len(params) > 0 {
+		requestURL += "?" + params.Encode()
+	}
+
+	var buf bytes.Buffer
+	if body != nil {
+		err := json.NewEncoder(&buf).Encode(body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, requestURL, &buf)
+
+	enc := base64.StdEncoding.EncodeToString([]byte(c.apiKey))
+	req.Header.Set(AUTH_HEADER_KEY, fmt.Sprintf("Basic %s:", enc))
+
+	if c.onBehalfOf != "" {
+		req.Header.Set(ON_BEAHALF_OF_HEADER_KEY, c.onBehalfOf)
+	}
+
+	if methodSendsBody(method) {
+		req.Header.Set(CONTENT_TYPE_HEADER_KEY, "application/json; charset=utf-8")
+	}
+
+	return req, err
+}
+
+func (c *Client) do(req *http.Request, v interface{}) error {
+	// req.Close = true
+	// resp, err := client.Do(req)
+	// if err != nil {
+	// 	return err
+	// }
+	// if resp == nil {
+	// 	return ErrShouldNotBeNil
+	// }
+	// defer resp.Body.Close()
+
+	// if r, err := isError(resp); r && err == nil {
+	// 	if r, err = isClientError(resp); r && err == nil {
+	// 		clientError := ClientError{
+	// 			StatusCode: resp.StatusCode,
+	// 		}
+	// 		err = readJSON(resp.Body, &clientError)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		return clientError
+	// 	}
+	// 	if r, err = isServerError(resp); r && err == nil {
+	// 		serverError := ServerError{
+	// 			StatusCode: resp.StatusCode,
+	// 		}
+	// 		err = readJSON(resp.Body, &serverError)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		return serverError
+	// 	}
+	// } else if err != nil {
+	// 	return err
+	// }
+
+	// err = readJSON(resp.Body, &v)
+	// return err
+	return nil
+}
+
+// Move to utils file
+func validMethod(method string) bool {
+	if method == http.MethodGet || method == http.MethodPost || method == http.MethodPatch || method == http.MethodDelete {
+		return false
+	}
+	return true
+}
+
+func methodSendsBody(method string) bool {
+	if method == http.MethodPost || method == http.MethodPatch {
+		return true
+	}
+	return false
+}
