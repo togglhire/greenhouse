@@ -115,7 +115,7 @@ type Note struct {
 	Visibility NoteVisibility `json:"visibility"`
 }
 
-type ListCandidatesQueryParams struct {
+type CandidateListParams struct {
 	PerPage       int64  `url:"per_page,omitempty"`
 	Page          int64  `url:"page,omitempty"`
 	CreatedBefore string `url:"created_before,omitempty"`

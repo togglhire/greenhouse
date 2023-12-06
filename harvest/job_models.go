@@ -14,7 +14,7 @@ type Job struct {
 	Status string `json:"status"`
 }
 
-type ListJobsQueryParams struct {
+type JobListParams struct {
 	PerPage              int64  `url:"per_page,omitempty"`
 	Page                 int64  `url:"page,omitempty"`
 	CreatedBefore        string `url:"created_before,omitempty"`

@@ -12,7 +12,7 @@ const (
 )
 
 type CandidatesService interface {
-	List(ListCandidatesQueryParams) ([]Candidate, error)
+	List(CandidateListParams) ([]Candidate, error)
 	Retrieve(int64) (*Candidate, error)
 	Add(*Candidate) error
 	Alter(int64, *Candidate) error
@@ -29,14 +29,14 @@ func NewCandidatesService(client *Client) *candidateService {
 }
 
 // Slice of Candidates or Slice of pointers to Candidates?
-func (s *candidateService) List(queryParams ListCandidatesQueryParams) ([]Candidate, error) {
+func (s *candidateService) List(queryParams CandidateListParams) ([]Candidate, error) {
 	params := structToURLValues(queryParams)
 	request, err := s.client.newRequest(http.MethodGet, CANDIDATES, params, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	candidates := make([]Candidate, 0)
+	var candidates []Candidate
 	err = s.client.do(request, candidates)
 
 	return candidates, err

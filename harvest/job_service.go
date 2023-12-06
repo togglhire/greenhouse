@@ -8,7 +8,7 @@ const (
 
 type JobsService interface {
 	// An alternative would be allowing users to pass a map of string to interface{}.
-	List(ListJobsQueryParams) ([]Job, error)
+	List(JobListParams) ([]Job, error)
 	Retrieve(int64) (*Job, error)
 }
 
@@ -20,13 +20,13 @@ func NewJobsService(client *Client) *jobService {
 	return &jobService{client}
 }
 
-func (s *jobService) List(params ListJobsQueryParams) ([]Job, error) {
+func (s *jobService) List(params JobListParams) ([]Job, error) {
 	request, err := s.client.newRequest("GET", JOBS, structToURLValues(params), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	jobs := make([]Job, 0)
+	var jobs []Job
 	if err = s.client.do(request, jobs); err != nil {
 		return nil, err
 	}
