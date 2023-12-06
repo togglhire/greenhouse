@@ -2,7 +2,6 @@ package harvest
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -11,13 +10,15 @@ import (
 
 func TestCandidateService_List(t *testing.T) {
 	tests := []struct {
-		name    string
-		params  CandidateListParams
-		want    []Candidate
-		wantErr bool
+		name           string
+		responseStatus int
+		params         CandidateListParams
+		want           []Candidate
+		wantErr        bool
 	}{
 		{
-			name: "List candidates",
+			name:           "List candidates",
+			responseStatus: http.StatusOK,
 			params: CandidateListParams{
 				UpdatedAfter: "2019-01-01T00:00:00Z",
 				PerPage:      100,
@@ -36,11 +37,11 @@ func TestCandidateService_List(t *testing.T) {
 					Company:   "IETF",
 				},
 			},
-			wantErr: false,
 		},
 		{
-			name:   "List candidates with no params",
-			params: CandidateListParams{},
+			name:           "List candidates with no params",
+			responseStatus: http.StatusOK,
+			params:         CandidateListParams{},
 			want: []Candidate{
 				{
 					Id:        17681532,
@@ -50,6 +51,13 @@ func TestCandidateService_List(t *testing.T) {
 				},
 			},
 			wantErr: false,
+		},
+		{
+			name:           "List candidates response error",
+			responseStatus: http.StatusInternalServerError,
+			params:         CandidateListParams{},
+			want:           nil,
+			wantErr:        true,
 		},
 	}
 
@@ -61,7 +69,10 @@ func TestCandidateService_List(t *testing.T) {
 			if r.Method != http.MethodGet {
 				t.Errorf("CandidateService.List() request method = %v, want %v", r.Method, http.MethodGet)
 			}
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(tt.responseStatus)
+			if tt.responseStatus != http.StatusOK {
+				return
+			}
 			payload, err := json.Marshal(tt.want)
 			if err != nil {
 				t.Fatalf("CandidateService.List() error = %v", err)
@@ -83,22 +94,32 @@ func TestCandidateService_List(t *testing.T) {
 }
 
 func TestCandidateService_Retrieve(t *testing.T) {
+	candidateId := int64(17681532)
 	tests := []struct {
-		name    string
-		id      int64
-		want    *Candidate
-		wantErr bool
+		name           string
+		responseStatus int
+		id             int64
+		want           *Candidate
+		wantErr        bool
 	}{
 		{
-			name: "Retrieve candidate",
-			id:   17681532,
+			name:           "Retrieve candidate",
+			responseStatus: http.StatusOK,
+			id:             candidateId,
 			want: &Candidate{
-				Id:        17681532,
+				Id:        candidateId,
 				FirstName: "John",
 				LastName:  "Doe",
 				Company:   "IETF",
 			},
 			wantErr: false,
+		},
+		{
+			name:           "Retrieve candidate response error",
+			responseStatus: http.StatusInternalServerError,
+			id:             candidateId,
+			want:           &Candidate{},
+			wantErr:        true,
 		},
 	}
 
@@ -110,7 +131,10 @@ func TestCandidateService_Retrieve(t *testing.T) {
 			if r.Method != http.MethodGet {
 				t.Errorf("CandidateService.Retrieve() request method = %v, want %v", r.Method, http.MethodGet)
 			}
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(tt.responseStatus)
+			if tt.responseStatus != http.StatusOK {
+				return
+			}
 			payload, err := json.Marshal(tt.want)
 			if err != nil {
 				t.Fatalf("CandidateService.Retrieve() error = %v", err)
@@ -137,7 +161,6 @@ func TestCandidateService_Add(t *testing.T) {
 		responseStatus int
 		candidate      *Candidate
 		wantErr        bool
-		expectedErr    error
 	}{
 		{
 			name:           "Add candidate",
@@ -147,8 +170,7 @@ func TestCandidateService_Add(t *testing.T) {
 				LastName:  "Doe",
 				Company:   "IETF",
 			},
-			wantErr:     false,
-			expectedErr: nil,
+			wantErr: false,
 		},
 		{
 			name:           "Add candidate with no first name",
@@ -157,8 +179,13 @@ func TestCandidateService_Add(t *testing.T) {
 				LastName: "Doe",
 				Company:  "IETF",
 			},
-			wantErr:     true,
-			expectedErr: &ValidationError{},
+			wantErr: true,
+		},
+		{
+			name:           "Add candidate response error",
+			responseStatus: http.StatusInternalServerError,
+			candidate:      nil,
+			wantErr:        true,
 		},
 	}
 
@@ -187,12 +214,6 @@ func TestCandidateService_Add(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("CandidateService.Add() error = %v, wantErr %v", err, tt.wantErr)
 			}
-
-			if tt.wantErr {
-				if errors.Is(err, tt.expectedErr) {
-					t.Errorf("CandidateService.Add() error = %v, expectedErr %v", err, tt.expectedErr)
-				}
-			}
 		})
 	}
 }
@@ -203,12 +224,14 @@ func TestCandidateService_Edit(t *testing.T) {
 	candidateLastName := "Doe"
 
 	tests := []struct {
-		name      string
-		candidate *Candidate
-		wantErr   bool
+		name           string
+		responseStatus int
+		candidate      *Candidate
+		wantErr        bool
 	}{
 		{
-			name: "Edit candidate",
+			name:           "Edit candidate",
+			responseStatus: http.StatusOK,
 			candidate: &Candidate{
 				Title:   "Senior Software Engineer",
 				Company: "NewCompany Co.",
@@ -237,6 +260,12 @@ func TestCandidateService_Edit(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name:           "Edit candidate response error",
+			responseStatus: http.StatusInternalServerError,
+			candidate:      nil,
+			wantErr:        true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -247,7 +276,10 @@ func TestCandidateService_Edit(t *testing.T) {
 			if r.Method != http.MethodPatch {
 				t.Errorf("CandidateService.Edit() request method = %v, want %v", r.Method, http.MethodPatch)
 			}
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(tt.responseStatus)
+			if tt.responseStatus != http.StatusOK {
+				return
+			}
 			returnCandidate := tt.candidate
 			returnCandidate.FirstName = candidateFirstName
 			returnCandidate.LastName = candidateLastName
@@ -265,11 +297,11 @@ func TestCandidateService_Edit(t *testing.T) {
 				t.Fatalf("CandidateService.Edit() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if tt.candidate.FirstName != candidateFirstName {
+			if !tt.wantErr && tt.candidate.FirstName != candidateFirstName {
 				t.Errorf("CandidateService.Edit() error = %v, expected FirstName to be John", err)
 			}
 
-			if tt.candidate.LastName != candidateLastName {
+			if !tt.wantErr && tt.candidate.LastName != candidateLastName {
 				t.Errorf("CandidateService.Edit() error = %v, expected LastName to be Doe", err)
 			}
 		})
@@ -280,18 +312,26 @@ func TestCandidateService_AddAttachment(t *testing.T) {
 	candidateId := int64(17681532)
 
 	tests := []struct {
-		name       string
-		attachment *Attachment
-		wantErr    bool
+		name           string
+		responseStatus int
+		attachment     *Attachment
+		wantErr        bool
 	}{
 		{
-			name: "Add attachment",
+			name:           "Add attachment",
+			responseStatus: http.StatusOK,
 			attachment: &Attachment{
 				Type:     "test.pdf",
 				Filename: string(ATResume),
 				URL:      "https://www.johndoe-123.com/test.pdf",
 			},
 			wantErr: false,
+		},
+		{
+			name:           "Add attachment response error",
+			responseStatus: http.StatusInternalServerError,
+			attachment:     nil,
+			wantErr:        true,
 		},
 	}
 
@@ -303,7 +343,10 @@ func TestCandidateService_AddAttachment(t *testing.T) {
 			if r.Method != http.MethodPost {
 				t.Errorf("CandidateService.AddAttachment() request method = %v, want %v", r.Method, http.MethodPost)
 			}
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(tt.responseStatus)
+			if tt.responseStatus != http.StatusOK {
+				return
+			}
 			payload, err := json.Marshal(tt.attachment)
 			if err != nil {
 				t.Fatalf("CandidateService.AddAttachment() error = %v", err)
@@ -324,18 +367,26 @@ func TestCandidateService_AddNote(t *testing.T) {
 	candidateId := int64(17681532)
 
 	tests := []struct {
-		name    string
-		note    *Note
-		wantErr bool
+		name           string
+		responseStatus int
+		note           *Note
+		wantErr        bool
 	}{
 		{
-			name: "Add Note",
+			name:           "Add Note",
+			responseStatus: http.StatusOK,
 			note: &Note{
 				UserId:     candidateId,
 				Body:       "This is a test note",
 				Visibility: NVPublic,
 			},
 			wantErr: false,
+		},
+		{
+			name:           "Add Note response error",
+			responseStatus: http.StatusInternalServerError,
+			note:           nil,
+			wantErr:        true,
 		},
 	}
 
@@ -347,7 +398,10 @@ func TestCandidateService_AddNote(t *testing.T) {
 			if r.Method != http.MethodPost {
 				t.Errorf("CandidateService.AddNote() request method = %v, want %v", r.Method, http.MethodPost)
 			}
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(tt.responseStatus)
+			if tt.responseStatus != http.StatusOK {
+				return
+			}
 			payload, err := json.Marshal(tt.note)
 			if err != nil {
 				t.Fatalf("CandidateService.AddNote() error = %v", err)
