@@ -118,7 +118,7 @@ func TestCandidateService_Retrieve(t *testing.T) {
 			name:           "Retrieve candidate response error",
 			responseStatus: http.StatusInternalServerError,
 			id:             candidateId,
-			want:           &Candidate{},
+			want:           nil,
 			wantErr:        true,
 		},
 	}

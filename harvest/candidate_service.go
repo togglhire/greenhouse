@@ -48,13 +48,13 @@ func (s *candidateService) List(queryParams CandidateListParams) ([]Candidate, e
 }
 
 func (s *candidateService) Retrieve(id int64) (*Candidate, error) {
-	candidate := &Candidate{}
 	request, err := s.client.newRequest(http.MethodGet, fmt.Sprintf("%s/%d", CANDIDATES, id), nil, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.client.do(request, candidate)
+	var candidate *Candidate
+	err = s.client.do(request, &candidate)
 
 	return candidate, err
 }

@@ -43,9 +43,15 @@ func (s *jobService) List(queryParams JobListParams) ([]Job, error) {
 }
 
 func (s *jobService) Retrieve(id int64) (*Job, error) {
-	_, err := s.client.newRequest("GET", fmt.Sprintf("%s/%d", JOBS, id), nil, nil)
+	request, err := s.client.newRequest("GET", fmt.Sprintf("%s/%d", JOBS, id), nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+
+	var job *Job
+	if err = s.client.do(request, &job); err != nil {
+		return nil, err
+	}
+
+	return job, nil
 }

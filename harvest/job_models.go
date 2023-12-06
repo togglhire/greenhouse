@@ -9,9 +9,11 @@ const (
 )
 
 type Job struct {
-	Id     int64  `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"status"`
+	Id          int64  `json:"id"`
+	Name        string `json:"name"`
+	Status      string `json:"status"`
+	Confidental bool   `json:"confidental"`
+	// TODO: Other fields
 }
 
 type JobListParams struct {
