@@ -1,7 +1,6 @@
 package harvest
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -65,9 +64,9 @@ func TestNewDefaultClientInvalidAPIKey(t *testing.T) {
 		t.Errorf("Expected error creating client with an empty api key")
 	}
 
-	var sdkError *SDKError
-	if !errors.As(err, &sdkError) {
-		t.Errorf("Expected error to be AuthError")
+	_, isSDKErr := err.(*SDKError)
+	if !isSDKErr {
+		t.Errorf("Expected error to be SDKError")
 	}
 }
 
@@ -80,8 +79,8 @@ func TestClientNewRequestWithInvalidMethod(t *testing.T) {
 		t.Errorf("Expected error creating request with invalid method")
 	}
 
-	var sdkError *SDKError
-	if !errors.As(err, &sdkError) {
-		t.Errorf("Expected error to be AuthError")
+	_, isSDKErr := err.(*SDKError)
+	if !isSDKErr {
+		t.Errorf("Expected error to be SDKError")
 	}
 }
