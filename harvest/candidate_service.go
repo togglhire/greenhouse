@@ -16,8 +16,8 @@ type CandidatesService interface {
 	Retrieve(int64) (*Candidate, error)
 	Add(*Candidate) error
 	Alter(int64, *Candidate) error
-	AddAttachment(int, *Attachment) error
-	AddNote(int, *Note) error
+	AddAttachment(int64, *Attachment) error
+	AddNote(int64, *Note) error
 }
 
 type candidateService struct {
@@ -37,7 +37,7 @@ func (s *candidateService) List(queryParams CandidateListParams) ([]Candidate, e
 	}
 
 	var candidates []Candidate
-	err = s.client.do(request, candidates)
+	err = s.client.do(request, &candidates)
 
 	return candidates, err
 }
@@ -73,7 +73,7 @@ func (s *candidateService) Alter(id int64, candidate *Candidate) error {
 	return s.client.do(request, candidate)
 }
 
-func (s *candidateService) AddAttachment(id int, attachment *Attachment) error {
+func (s *candidateService) AddAttachment(id int64, attachment *Attachment) error {
 	request, err := s.client.newRequest(http.MethodPost, fmt.Sprintf("%s/%d/%s", CANDIDATES, id, ATTACHMENTS), nil, attachment)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (s *candidateService) AddAttachment(id int, attachment *Attachment) error {
 	return s.client.do(request, attachment)
 }
 
-func (s *candidateService) AddNote(id int, note *Note) error {
+func (s *candidateService) AddNote(id int64, note *Note) error {
 	request, err := s.client.newRequest(http.MethodPost, fmt.Sprintf("%s/%d/%s", CANDIDATES, id, NOTES), nil, note)
 	if err != nil {
 		return err

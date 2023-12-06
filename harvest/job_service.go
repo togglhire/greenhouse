@@ -27,7 +27,7 @@ func (s *jobService) List(params JobListParams) ([]Job, error) {
 	}
 
 	var jobs []Job
-	if err = s.client.do(request, jobs); err != nil {
+	if err = s.client.do(request, &jobs); err != nil {
 		return nil, err
 	}
 

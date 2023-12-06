@@ -95,7 +95,7 @@ func (se *SDKError) Error() string {
 
 func isErrorResponse(resp *http.Response) (bool, error) {
 	if resp == nil {
-		return false, NewSDKError("could not get a response, response is nil")
+		return true, NewSDKError("could not get a response, response is nil")
 	}
 	respCode := resp.StatusCode
 	if respCode == 401 {
@@ -105,11 +105,11 @@ func isErrorResponse(resp *http.Response) (bool, error) {
 		return true, NewForbiddenError("forbidden")
 	}
 	if respCode == 422 {
-		error := NewValidationError("invalid input provided", nil)
-		if err := readJSON(resp.Body, error); err != nil {
-			return false, NewSDKError(fmt.Sprintf("error decoding response: %v", err))
+		err := NewValidationError("invalid input provided", nil)
+		if err := readJSON(resp.Body, err); err != nil {
+			return true, NewSDKError(fmt.Sprintf("error decoding response: %v", err))
 		}
-		return true, error
+		return true, err
 	}
 	if respCode == 429 {
 		return true, NewRateLimitError("rate limit exceeded")

@@ -104,7 +104,7 @@ func (c *Client) newRequest(method string, endpointPath string, params url.Value
 	if isValidMethod(method) {
 		return nil, NewSDKError("invalid method provided")
 	}
-	requestURL := fmt.Sprintf("%s/%s", c.baseURL, endpointPath)
+	requestURL := fmt.Sprintf("%s%s", c.baseURL, endpointPath)
 
 	if len(params) > 0 {
 		requestURL += "?" + params.Encode()

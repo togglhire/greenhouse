@@ -22,13 +22,17 @@ var (
 	client *Client
 )
 
-func setup(apiKey string, onBehalfOf string, t *testing.T) {
+func setup(apiKey string, onBehalfOf string, baseURL string, t *testing.T) {
 	// Test server
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
 
+	if baseURL == "" {
+		baseURL = server.URL + "/"
+	}
+
 	var err error
-	client, err = NewDefaultClient(apiKey, onBehalfOf, nil)
+	client, err = NewClient(apiKey, onBehalfOf, nil, baseURL, V1)
 	if err != nil {
 		t.Errorf("Error creating client: %s", err.Error())
 	}
@@ -39,7 +43,7 @@ func teardown() {
 }
 
 func TestNewDefaultClient(t *testing.T) {
-	setup(TEST_API_KEY, TEST_ON_BEHALF_OF, t)
+	setup(TEST_API_KEY, TEST_ON_BEHALF_OF, DEFAULT_BASE_URL, t)
 	defer teardown()
 
 	if client.baseURL != DEFAULT_BASE_URL+string(V1)+"/" {
@@ -68,7 +72,7 @@ func TestNewDefaultClientInvalidAPIKey(t *testing.T) {
 }
 
 func TestClientNewRequestWithInvalidMethod(t *testing.T) {
-	setup(TEST_API_KEY, TEST_ON_BEHALF_OF, t)
+	setup(TEST_API_KEY, TEST_ON_BEHALF_OF, DEFAULT_BASE_URL, t)
 	defer teardown()
 
 	_, err := client.newRequest("INVALID", "test", nil, nil)
