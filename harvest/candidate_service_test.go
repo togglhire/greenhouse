@@ -133,13 +133,15 @@ func TestCandidateService_Retrieve(t *testing.T) {
 
 func TestCandidateService_Add(t *testing.T) {
 	tests := []struct {
-		name        string
-		candidate   *Candidate
-		wantErr     bool
-		expectedErr error
+		name           string
+		responseStatus int
+		candidate      *Candidate
+		wantErr        bool
+		expectedErr    error
 	}{
 		{
-			name: "Add candidate",
+			name:           "Add candidate",
+			responseStatus: http.StatusOK,
 			candidate: &Candidate{
 				FirstName: "John",
 				LastName:  "Doe",
@@ -149,13 +151,14 @@ func TestCandidateService_Add(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			name: "Add candidate with no first name",
+			name:           "Add candidate with no first name",
+			responseStatus: http.StatusUnprocessableEntity,
 			candidate: &Candidate{
 				LastName: "Doe",
 				Company:  "IETF",
 			},
 			wantErr:     true,
-			expectedErr: &ValidationError{}, // Couldn't use this;
+			expectedErr: &ValidationError{},
 		},
 	}
 
@@ -167,15 +170,14 @@ func TestCandidateService_Add(t *testing.T) {
 			if r.Method != http.MethodPost {
 				t.Errorf("CandidateService.Add() request method = %v, want %v", r.Method, http.MethodPost)
 			}
+			w.WriteHeader(tt.responseStatus)
 			if !tt.wantErr {
-				w.WriteHeader(http.StatusOK)
 				payload, err := json.Marshal(tt.candidate)
 				if err != nil {
 					t.Fatalf("CandidateService.Add() error = %v", err)
 				}
 				w.Write(payload)
 			} else {
-				w.WriteHeader(http.StatusUnprocessableEntity)
 				w.Write([]byte(`{}`))
 			}
 		})
@@ -187,8 +189,7 @@ func TestCandidateService_Add(t *testing.T) {
 			}
 
 			if tt.wantErr {
-				var validationErr *ValidationError
-				if !errors.As(err, &validationErr) {
+				if errors.Is(err, tt.expectedErr) {
 					t.Errorf("CandidateService.Add() error = %v, expectedErr %v", err, tt.expectedErr)
 				}
 			}
