@@ -3,6 +3,8 @@ package harvest
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -30,7 +32,10 @@ func NewCandidatesService(client *Client) *candidateService {
 
 // Slice of Candidates or Slice of pointers to Candidates?
 func (s *candidateService) List(queryParams CandidateListParams) ([]Candidate, error) {
-	params := structToURLValues(queryParams)
+	params, err := query.Values(queryParams)
+	if err != nil {
+		return nil, NewSDKError(fmt.Sprintf("error parsing query params: %s", err.Error()))
+	}
 	request, err := s.client.newRequest(http.MethodGet, CANDIDATES, params, nil)
 	if err != nil {
 		return nil, err

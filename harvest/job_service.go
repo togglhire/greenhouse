@@ -1,6 +1,10 @@
 package harvest
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/go-querystring/query"
+)
 
 const (
 	JOBS = "jobs"
@@ -20,8 +24,12 @@ func NewJobsService(client *Client) *jobService {
 	return &jobService{client}
 }
 
-func (s *jobService) List(params JobListParams) ([]Job, error) {
-	request, err := s.client.newRequest("GET", JOBS, structToURLValues(params), nil)
+func (s *jobService) List(queryParams JobListParams) ([]Job, error) {
+	params, err := query.Values(queryParams)
+	if err != nil {
+		return nil, NewSDKError(fmt.Sprintf("error parsing query params: %s", err.Error()))
+	}
+	request, err := s.client.newRequest("GET", JOBS, params, nil)
 	if err != nil {
 		return nil, err
 	}
