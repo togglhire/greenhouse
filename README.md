@@ -1,16 +1,17 @@
 # Greenhouse
-[![CircleCI](https://circleci.com/gh/Hundred5/greenhouse/tree/master.svg?style=svg)](https://circleci.com/gh/Hundred5/greenhouse/tree/master)
+Client Library for greenhouse [Ingestion](https://developers.greenhouse.io/candidate-ingestion.html) and [Harvest](https://developers.greenhouse.io/harvest.html) API's.
 
-## Greenhouse Ingestion API
-https://developers.greenhouse.io/candidate-ingestion.html
+[![CircleCI](https://circleci.com/gh/Hundred5/greenhouse/tree/master.svg?style=svg)](https://circleci.com/gh/Hundred5/greenhouse/tree/master)
 
 ### Installation
 Install using the "go get" command:
 ```sh
-go get github.com/hundred5/greenhouse/ingestion
+go get github.com/hundred5/greenhouse
 ```
 
-### Example
+## Examples
+
+### Ingestion
 
 ```go
 import "github.com/hundred5/greenhouse/ingestion"
@@ -56,3 +57,26 @@ if serverError, ok := ingestion.IsServerError(err); ok {
     }
 }
 ```
+
+## Harvest
+Usage example
+
+```go
+import "github.com/hundred5/greenhouse/harvest"
+
+client, err := harvest.NewDefaultClient("{{API_KEY}}", "{{ON BEHALF OF HEADER}}")
+if err != nil {
+    log.Fatalf("Failed to create an harvest client: %s", err)
+}
+
+jobId = 312
+job, err := client.Jobs.Retrieve(jobId)
+if err != nil {
+    log.Fatalf("Could not retrieve job with the provided id: %d", jobId)
+}
+```
+
+### Additional Links:
+Harvest API: https://developers.greenhouse.io/harvest.html
+
+Ingest API: https://developers.greenhouse.io/candidate-ingestion.html
