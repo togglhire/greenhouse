@@ -2,8 +2,8 @@ package harvest
 
 type Candidate struct {
 	Id                   int64                          `json:"id,omitempty"`
-	FirstName            string                         `json:"first_name"`
-	LastName             string                         `json:"last_name"`
+	FirstName            string                         `json:"first_name,omitempty"`
+	LastName             string                         `json:"last_name,omitempty"`
 	Company              string                         `json:"company,omitempty"`
 	Title                string                         `json:"title,omitempty"`
 	IsPrivate            PrivateType                    `json:"is_private,omitempty"`

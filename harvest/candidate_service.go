@@ -17,7 +17,7 @@ type CandidatesService interface {
 	List(CandidateListParams) ([]Candidate, error)
 	Retrieve(int64) (*Candidate, error)
 	Add(*Candidate) error
-	Alter(int64, *Candidate) error
+	Edit(int64, *Candidate) error
 	AddAttachment(int64, *Attachment) error
 	AddNote(int64, *Note) error
 }
@@ -69,8 +69,8 @@ func (s *candidateService) Add(candidate *Candidate) error {
 }
 
 // NOTE: Id could also be in the candidate struct
-func (s *candidateService) Alter(id int64, candidate *Candidate) error {
-	request, err := s.client.newRequest(http.MethodPut, fmt.Sprintf("%s/%d", CANDIDATES, id), nil, candidate)
+func (s *candidateService) Edit(id int64, candidate *Candidate) error {
+	request, err := s.client.newRequest(http.MethodPatch, fmt.Sprintf("%s/%d", CANDIDATES, id), nil, candidate)
 	if err != nil {
 		return err
 	}
