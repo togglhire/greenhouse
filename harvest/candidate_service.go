@@ -54,7 +54,9 @@ func (s *candidateService) Retrieve(id int64) (*Candidate, error) {
 	}
 
 	var candidate *Candidate
-	err = s.client.do(request, &candidate)
+	if err = s.client.do(request, &candidate); err != nil {
+		return nil, err
+	}
 
 	return candidate, err
 }
